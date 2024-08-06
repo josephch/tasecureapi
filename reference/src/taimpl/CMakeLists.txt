@@ -202,7 +202,7 @@ endif ()
 
 find_package(OpenSSL REQUIRED)
 
-target_compile_options(taimpl PRIVATE -Werror -Wall -Wextra -Wno-unused-parameter)
+target_compile_options(taimpl PRIVATE -Werror -Wall -Wextra -Wno-unused-parameter -Wno-cast-function-type)
 
 target_clangformat_setup(taimpl)
 
@@ -231,7 +231,7 @@ target_include_directories(taimpltest
         ${OPENSSL_INCLUDE_DIR}
         )
 
-target_compile_options(taimpltest PRIVATE -Werror -Wall -Wextra -Wno-unused-parameter)
+target_compile_options(taimpltest PRIVATE -Werror -Wall -Wextra -Wno-unused-parameter -Wno-cast-function-type)
 
 target_link_libraries(taimpltest
         PRIVATE

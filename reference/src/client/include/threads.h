@@ -315,7 +315,7 @@ static C11THREADS_INLINE void call_once(once_flag *flag, void (*func)(void))
 	pthread_once(flag, func);
 }
 
-#ifdef C11THREADS_NO_TIMESPEC_GET
+#if 0//def C11THREADS_NO_TIMESPEC_GET
 static C11THREADS_INLINE int timespec_get(struct timespec *ts, int base)
 {
 	struct timeval tv;

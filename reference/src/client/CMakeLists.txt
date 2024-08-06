@@ -80,7 +80,7 @@ add_library(saclient SHARED
         src/sa_public_key.c
         )
 
-target_compile_options(saclient PRIVATE -Werror -Wall -Wextra -Wno-type-limits -Wno-unused-parameter
+target_compile_options(saclient PRIVATE -Werror -Wall -Wextra -Wno-type-limits -Wno-unused-parameter -Wno-cast-function-type
         -Wno-deprecated-declarations)
 
 set_target_properties(saclient PROPERTIES
@@ -283,7 +283,7 @@ add_executable(saclienttest
         test/sa_svp_common.cpp
         test/sa_svp_common.h)
 
-target_compile_options(saclienttest PRIVATE -Werror -Wall -Wextra -Wno-type-limits -Wno-unused-parameter
+target_compile_options(saclienttest PRIVATE -Werror -Wall -Wextra -Wno-type-limits -Wno-unused-parameter -Wno-cast-function-type
         -Wno-deprecated-declarations)
 
 target_include_directories(saclienttest

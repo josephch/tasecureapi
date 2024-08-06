@@ -117,6 +117,6 @@ if (COVERAGE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             )
 endif ()
 
-target_compile_options(saclientimpl PRIVATE -Werror -Wall -Wextra -Wno-unused-parameter)
+target_compile_options(saclientimpl PRIVATE -Werror -Wall -Wextra -Wno-unused-parameter -Wno-cast-function-type)
 
 target_clangformat_setup(saclientimpl)
