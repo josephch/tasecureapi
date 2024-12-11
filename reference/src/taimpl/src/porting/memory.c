@@ -19,7 +19,62 @@
 #include "porting/memory.h" // NOLINT
 #include "log.h"
 #include "porting/overflow.h"
+#include <assert.h>
+#include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+typedef struct MemoryNode {
+    void* buffer;
+    size_t size;
+    struct MemoryNode* next;
+} MemoryNode_t;
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+MemoryNode_t* g_memory_node = NULL;
+size_t g_total_memory = 0;
+size_t g_highest_memory = 0;
+
+static void register_alloc(void* buffer, size_t size) {
+    pthread_mutex_lock(&mutex);
+    MemoryNode_t* node = malloc(sizeof(MemoryNode_t));
+    node->next = g_memory_node;
+    node->buffer = buffer;
+    node->size = size;
+    g_memory_node = node;
+    g_total_memory += size;
+    if (g_total_memory > g_highest_memory) {
+        g_highest_memory = g_total_memory;
+    }
+    printf("Highest ever memory : %zu Total internal memory : %zu last allocated : %zu\n", g_highest_memory, g_total_memory, size);
+    pthread_mutex_unlock(&mutex);
+}
+
+static void register_free(void* buffer) {
+    if (buffer) {
+        pthread_mutex_lock(&mutex);
+        MemoryNode_t* prev = g_memory_node;
+        MemoryNode_t* node = g_memory_node;
+        while (node) {
+            if (node->buffer == buffer) {
+                break;
+            }
+            prev = node;
+            node = node->next;
+        }
+        assert(node);
+        if (node == g_memory_node) {
+            g_memory_node = node->next;
+        } else {
+            prev->next = node->next;
+        }
+        g_total_memory -= node->size;
+        printf("Highest ever memory : %zu Total internal memory : %zu last freed : %zu\n", g_highest_memory, g_total_memory, node->size);
+        free(node);
+        pthread_mutex_unlock(&mutex);
+    }
+}
 
 void* memory_secure_alloc(size_t size) {
     return memory_internal_alloc(size);
@@ -34,14 +89,20 @@ void memory_secure_free(void* buffer) {
 }
 
 void* memory_internal_alloc(size_t size) {
-    return malloc(size);
+    void* buffer = malloc(size);
+    register_alloc(buffer, size);
+    return buffer;
 }
 
 void* memory_internal_realloc(void* buffer, size_t new_size) {
-    return realloc(buffer, new_size);
+    register_free(buffer);
+    buffer = realloc(buffer, new_size);
+    register_alloc(buffer, new_size);
+    return buffer;
 }
 
 void memory_internal_free(void* buffer) {
+    register_free(buffer);
     free(buffer);
 }
 
